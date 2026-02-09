@@ -134,12 +134,12 @@ export const SimpleCityOverview: React.FC = () => {
                         <div key={user.id} className="p-6 hover:bg-orange-500/5 transition-colors flex justify-between items-center group">
                             <div>
                                 <h4 className="text-lg font-serif font-bold text-orange-100 group-hover:text-white transition-colors">{user.name}</h4>
-                                <p className="text-sm text-slate-500 font-mono group-hover:text-orange-400/60 transition-colors">{user.email} • {user.id.substring(0, 8)}...</p>
-                                <p className="text-xs text-slate-600 mt-1 uppercase tracking-wide group-hover:text-slate-400">{user.address}</p>
+                                <p className="text-sm text-slate-500 font-mono group-hover:text-orange-400/60 transition-colors">{user.email || 'no-email'} • {(user.id || '').substring(0, 8)}...</p>
+                                <p className="text-xs text-slate-600 mt-1 uppercase tracking-wide group-hover:text-slate-400">{user.address || 'No Address'}</p>
                             </div>
                             <div className="text-right">
                                 <div className="text-2xl font-serif font-bold text-emerald-400 drop-shadow-sm">
-                                    ₹{user.wallet_balance?.toFixed(2) || user.walletBalance?.toFixed(2) || '0.00'}
+                                    ₹{(user.wallet_balance || user.walletBalance || 0).toFixed(2)}
                                 </div>
                                 <div className="text-[10px] text-emerald-500/50 uppercase tracking-widest font-bold">Wallet Balance</div>
                             </div>
