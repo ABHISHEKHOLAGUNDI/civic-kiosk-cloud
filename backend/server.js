@@ -429,7 +429,14 @@ app.get('/users/:userId/score', async (req, res) => {
         if (result.rows.length === 0) {
             return res.status(404).json({ error: 'User not found' });
         }
-        res.json({ score: result.rows[0].score });
+        const score = result.rows[0].score || 0;
+        let rank = 'Newbie';
+        if (score >= 2000) rank = 'Titan';
+        else if (score >= 1000) rank = 'Gold';
+        else if (score >= 500) rank = 'Silver';
+        else if (score >= 100) rank = 'Bronze';
+
+        res.json({ score, rank });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

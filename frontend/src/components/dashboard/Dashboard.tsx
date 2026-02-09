@@ -280,7 +280,7 @@ export const Dashboard: React.FC = () => {
                                         </div>
                                         <div className="flex justify-between text-xs font-mono text-purple-300/60 w-full max-w-md">
                                             <span>{t('currentRank').toUpperCase()}</span>
-                                            <span>{citizenScore.rank.toUpperCase()}</span>
+                                            <span>{(citizenScore.rank || 'CITIZEN').toUpperCase()}</span>
                                         </div>
                                     </div>
                                 </div>
