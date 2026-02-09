@@ -90,6 +90,16 @@ export const BillDetailsPage: React.FC = () => {
                 }
                 setViewState('otp'); // Show OTP input screen
             } else {
+                // 🚨 HACKATHON BYPASS: Check if server gave us the OTP despite failure
+                if (otpResult.otp) {
+                    toast.error('Email Port Blocked (Provider Restriction)', {
+                        description: `DEBUG MODE: Because your server blocks emails, your OTP is: ${otpResult.otp}`,
+                        duration: 20000,
+                    });
+                    setViewState('otp');
+                    return;
+                }
+
                 // Handle specific errors
                 if (otpResult.retryAfter) {
                     toast.error(`Rate limit exceeded. Please wait ${otpResult.retryAfter} minutes.`, {
