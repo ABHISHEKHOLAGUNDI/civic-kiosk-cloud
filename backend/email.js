@@ -23,14 +23,29 @@ function initEmail() {
 
     try {
         transporter = nodemailer.createTransport({
-            service: 'gmail',
+            host: 'smtp.gmail.com',
+            port: 465,
+            secure: true, // Use SSL
             auth: {
                 user: GMAIL_USER,
-                pass: GMAIL_APP_PASSWORD
+                pass: GMAIL_APP_PASSWORD.replace(/\s/g, '') // Remove any spaces
+            },
+            connectionTimeout: 10000, // 10s timeout
+            greetingTimeout: 5000,
+            socketTimeout: 15000
+        });
+
+        // Verify connection once at start
+        transporter.verify((error, success) => {
+            if (error) {
+                console.error('❌ Email transporter verification failed:', error.message);
+            } else {
+                console.log('✅ Email transporter is ready to take messages');
             }
         });
+
         isConfigured = true;
-        console.log('✅ Email notifications ready (Gmail)');
+        console.log('✅ Email notifications ready (SMTP)');
         return true;
     } catch (error) {
         console.error('❌ Email setup failed:', error.message);
@@ -47,11 +62,19 @@ async function sendEmailNotification(toEmail, subject, message, attachments = []
 
     try {
         const mailOptions = {
-            from: `SUVIDHA Kiosk <${GMAIL_USER}>`,
+            from: `"SUVIDHA Kiosk" <${GMAIL_USER}>`,
             to: toEmail,
             subject: subject,
             text: message,
-            attachments: attachments,
+            attachments: attachments.map(att => {
+                // SAFETY: If content is provided, ensure path is NOT provided
+                // Nodemailer hangs if 'path' is a large base64 string
+                if (att.content && att.path) {
+                    const { path, ...safeAtt } = att;
+                    return safeAtt;
+                }
+                return att;
+            }),
             html: `
                 <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 2px solid #0891b2; border-radius: 10px;">
                     <div style="background: linear-gradient(135deg, #0891b2 0%, #06b6d4 100%); padding: 20px; border-radius: 8px 8px 0 0; text-align: center;">

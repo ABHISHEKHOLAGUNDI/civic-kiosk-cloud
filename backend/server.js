@@ -756,38 +756,29 @@ app.post('/admin/resolve-grievance', requireAdmin, async (req, res) => {
 
         console.log(`✅ Grievance ${id} status updated to: ${status}`);
 
-        // Notify Citizen if status is Resolved
+        res.json({
+            success: true,
+            message: 'Grievance update processed. Citizen notification pending in background.'
+        });
+
+        // Notify Citizen if status is Resolved (IN BACKGROUND)
         if (status === 'Resolved' && grievance.user_id) {
             const uResult = await db.query("SELECT * FROM users WHERE id = $1", [grievance.user_id]);
             const user = uResult.rows[0];
 
             if (user && user.email) {
-                try {
-                    const emailData = email.getGrievanceResolvedEmail(user.name, id, grievance.category, resolutionProof);
-                    const emailResult = await email.sendEmailNotification(user.email, emailData.subject, emailData.message, emailData.attachments);
-
-                    if (emailResult.demo) {
-                        console.log(`📧 DEMO MODE: Resolution email for ${user.email}`);
-                        console.log(`   Configure GMAIL_USER and GMAIL_APP_PASSWORD in .env to enable emails`);
-                    } else if (emailResult.success) {
-                        console.log(`✅ Resolution email sent to ${user.email} for grievance ${id}`);
-                    } else {
-                        console.error(`❌ Failed to send resolution email to ${user.email}:`, emailResult.error);
-                        // Don't fail the entire request if email fails
-                    }
-                } catch (emailError) {
-                    console.error('❌ Email notification error:', emailError);
-                    // Continue even if email fails
-                }
-            } else {
-                console.warn(`⚠️ User ${grievance.user_id} not found or has no email. Skipping email notification.`);
+                const emailData = email.getGrievanceResolvedEmail(user.name, id, grievance.category, resolutionProof);
+                email.sendEmailNotification(user.email, emailData.subject, emailData.message, emailData.attachments)
+                    .then(emailResult => {
+                        if (emailResult.success) {
+                            console.log(`✅ Resolution email sent to ${user.email} for grievance ${id}`);
+                        } else {
+                            console.error(`❌ Failed to send resolution email to ${user.email}:`, emailResult.error);
+                        }
+                    })
+                    .catch(emailError => console.error('❌ Background Email Error:', emailError));
             }
         }
-
-        res.json({
-            success: true,
-            message: 'Grievance resolved and citizen notified.'
-        });
     } catch (err) {
         console.error("❌ Resolve grievance error:", err);
         res.status(500).json({
@@ -973,7 +964,7 @@ app.post('/api/chat', async (req, res) => {
 app.get('/api/announcements/current', async (req, res) => {
     try {
         const result = await db.query(
-            'SELECT * FROM announcements WHERE active = 1 ORDER BY created_at DESC LIMIT 1'
+            'SELECT * FROM announcements WHERE active = true ORDER BY created_at DESC LIMIT 1'
         );
         res.json(result.rows[0] || { message: 'Water supply maintenance in Indiranagar scheduled for 24th Jan.' });
     } catch (error) {
@@ -992,14 +983,14 @@ app.post('/api/announcements', requireAdmin, async (req, res) => {
         }
 
         // Deactivate all previous announcements
-        await db.query('UPDATE announcements SET active = 0');
+        await db.query('UPDATE announcements SET active = false');
 
         // Create new announcement
         const id = `ANNOUNCE-${Date.now()}`;
         const created_at = new Date().toISOString();
 
         await db.query(
-            'INSERT INTO announcements (id, message, created_by, created_at, active) VALUES ($1, $2, $3, $4, 1)',
+            'INSERT INTO announcements (id, message, created_by, created_at, active) VALUES ($1, $2, $3, $4, true)',
             [id, message.trim(), req.session.userId, created_at]
         );
 
