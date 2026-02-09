@@ -30,16 +30,17 @@ function initEmail() {
 
     try {
         transporter = nodemailer.createTransport({
+            service: 'gmail',
             host: 'smtp.gmail.com',
-            port: 587,
-            secure: false, // Use STARTTLS
+            port: 465,
+            secure: true, // Use SSL/TLS
             auth: {
                 user: finalUser,
                 pass: finalPass.replace(/\s/g, '') // Remove any spaces
             },
-            connectionTimeout: 10000,
-            greetingTimeout: 5000,
-            socketTimeout: 15000
+            connectionTimeout: 20000, // Increased timeout
+            greetingTimeout: 10000,
+            socketTimeout: 30000
         });
 
         // Verify connection once at start
