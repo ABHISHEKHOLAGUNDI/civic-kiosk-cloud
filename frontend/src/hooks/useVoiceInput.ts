@@ -49,7 +49,12 @@ export const useVoiceInput = () => {
             };
 
             recognition.onresult = (event: any) => {
-                const command = event.results[0][0].transcript.toLowerCase();
+                const results = event?.results;
+                if (!results || results.length === 0) return;
+                const transcript = results[0][0]?.transcript;
+                if (!transcript) return;
+
+                const command = transcript.toLowerCase();
                 setTranscript(command);
                 handleCommand(command);
             };

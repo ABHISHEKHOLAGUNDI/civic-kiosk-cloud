@@ -33,7 +33,8 @@ export const StatusPage: React.FC = () => {
 
     const handleSearch = () => {
         if (searchId) {
-            const found = allGrievances.filter(g => g.id.toLowerCase().includes(searchId.toLowerCase()));
+            const query = (searchId || '').toLowerCase();
+            const found = allGrievances.filter(g => (g?.id || '').toLowerCase().includes(query));
             setGrievances(found);
         } else {
             setGrievances(allGrievances);

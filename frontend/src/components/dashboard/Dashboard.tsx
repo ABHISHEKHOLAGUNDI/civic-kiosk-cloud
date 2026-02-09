@@ -122,17 +122,17 @@ export const Dashboard: React.FC = () => {
         return () => clearInterval(pollInterval);
         // Listen for real-time updates
         const handleCityPulse = (data: any) => {
-            if (data.type === 'GRID_UPDATE') {
+            if (data?.type === 'GRID_UPDATE' && data?.payload) {
                 setLiveStats({
                     power: {
-                        load: parseFloat(data.payload.electricity.currentLoad),
-                        units: parseFloat(data.payload.electricity.totalUnits),
-                        status: data.payload.electricity.status
+                        load: parseFloat(data.payload.electricity?.currentLoad || 0),
+                        units: parseFloat(data.payload.electricity?.totalUnits || 0),
+                        status: data.payload.electricity?.status || 'NORMAL'
                     },
                     water: {
-                        flow: parseFloat(data.payload.water.flowRate),
-                        pressure: parseFloat(data.payload.water.pressure),
-                        leak: data.payload.water.leakage
+                        flow: parseFloat(data.payload.water?.flowRate || 0),
+                        pressure: parseFloat(data.payload.water?.pressure || 0),
+                        leak: !!data.payload.water?.leakage
                     }
                 });
             }
@@ -215,14 +215,14 @@ export const Dashboard: React.FC = () => {
                             {/* 1. BILLS & UTILITIES (Consolidated) */}
                             <ServiceCard
                                 title={t('myBills')}
-                                icon={<Receipt className={liveStats?.water.leak || liveStats?.power.status === 'OUTAGE' ? "text-red-500" : "text-amber-400"} />}
+                                icon={<Receipt className={liveStats?.water?.leak || liveStats?.power?.status === 'OUTAGE' ? "text-red-500" : "text-amber-400"} />}
                                 status={
-                                    liveStats?.water.leak ? "CRITICAL: Water Leak" :
-                                        liveStats?.power.status === 'OUTAGE' ? "Power Outage Detected" :
+                                    liveStats?.water?.leak ? "CRITICAL: Water Leak" :
+                                        liveStats?.power?.status === 'OUTAGE' ? "Power Outage Detected" :
                                             (elecBill && elecBill.amount > 0 ? `Alert: ${CURRENCY_FORMAT.format(elecBill.amount)} Due` : "All Services Normal")
                                 }
                                 variant={
-                                    liveStats?.water.leak || liveStats?.power.status === 'OUTAGE' || (elecBill && elecBill.amount > 0)
+                                    liveStats?.water?.leak || liveStats?.power?.status === 'OUTAGE' || (elecBill && elecBill.amount > 0)
                                         ? "alert" : "success"
                                 }
                                 actionLabel={t('viewPay')}
