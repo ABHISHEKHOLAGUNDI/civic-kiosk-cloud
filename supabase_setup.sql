@@ -1,3 +1,13 @@
+-- RESET DATABASE (Drop all tables to start fresh)
+DROP TABLE IF EXISTS announcements CASCADE;
+DROP TABLE IF EXISTS settings CASCADE;
+DROP TABLE IF EXISTS waste_requests CASCADE;
+DROP TABLE IF EXISTS grievances CASCADE;
+DROP TABLE IF EXISTS transactions CASCADE;
+DROP TABLE IF EXISTS water_valves CASCADE;
+DROP TABLE IF EXISTS smart_meters CASCADE;
+DROP TABLE IF EXISTS users CASCADE;
+
 -- Enable UUID extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
